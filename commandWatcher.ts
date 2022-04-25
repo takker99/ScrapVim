@@ -17,8 +17,24 @@ export async function* commandWatcher(
     event.stopPropagation();
     handleEvent(event);
   };
+  const onCompositionEnd = (e: unknown) => {
+    const event = e as CompositionEvent;
+    if (!event.isTrusted) return;
+    if (!(event.target instanceof HTMLElement)) return;
+    if (event.target.id !== "text-input") return;
+    event.stopPropagation();
+    handleEvent(event);
+
+    // 空文字のcompositionendを代わりに発生させて、IME操作が壊れないようにする
+    element.value = "";
+    const dummy = new CompositionEvent("compositionend", { data: "" });
+    element.dispatchEvent(dummy);
+  };
+  const parent = element.parentElement ?? document;
   element.addEventListener("compositionstart", callback);
-  element.addEventListener("compositionend", callback);
+  parent.addEventListener("compositionend", onCompositionEnd, {
+    capture: true,
+  });
   element.addEventListener("keydown", callback);
 
   try {
@@ -67,7 +83,9 @@ export async function* commandWatcher(
     throw e;
   } finally {
     element.removeEventListener("compositionstart", callback);
-    element.removeEventListener("compositionend", callback);
+    parent.removeEventListener("compositionend", onCompositionEnd, {
+      capture: true,
+    });
     element.removeEventListener("keydown", callback);
   }
 }
