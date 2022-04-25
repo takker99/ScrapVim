@@ -19,7 +19,7 @@ export async function* commandWatcher(
   };
   element.addEventListener("compositionstart", callback);
   element.addEventListener("compositionend", callback);
-  document.addEventListener("keydown", callback);
+  element.addEventListener("keydown", callback);
 
   try {
     while (true) {
@@ -68,6 +68,6 @@ export async function* commandWatcher(
   } finally {
     element.removeEventListener("compositionstart", callback);
     element.removeEventListener("compositionend", callback);
-    document.removeEventListener("keydown", callback);
+    element.removeEventListener("keydown", callback);
   }
 }
