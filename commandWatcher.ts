@@ -44,14 +44,22 @@ export async function* commandWatcher(
       while (true) {
         const endEvent = await watcher();
         if (
-          !(endEvent instanceof KeyboardEvent &&
-            endEvent.type === "compositionend")
+          endEvent instanceof CompositionEvent &&
+          endEvent.type !== "compositionend"
         ) {
           continue;
         }
+
         for (const char of event.data) {
           yield char;
         }
+        if (endEvent instanceof KeyboardEvent) {
+          if (endEvent.isComposing) break;
+          const key = toVimKey(endEvent);
+          if (key === undefined) break;
+          yield key;
+        }
+
         break;
       }
     }
