@@ -8,14 +8,18 @@ import { toVimKey } from "./toVimKey.ts";
 export async function* commandWatcher(
   element: HTMLInputElement | HTMLTextAreaElement,
 ) {
-  const [watcher, handleEvent] = promisify<CompositionEvent | KeyboardEvent>({
-    maxQueued: 0,
-  });
+  const [watcher, handleEvent] = promisify<CompositionEvent | KeyboardEvent>();
 
-  const callback = (e: unknown) => handleEvent(e as CompositionEvent);
+  const callback = (e: unknown) => {
+    const event = e as (CompositionEvent | KeyboardEvent);
+    if (!event.isTrusted) return;
+    event.preventDefault();
+    event.stopPropagation();
+    handleEvent(event);
+  };
   element.addEventListener("compositionstart", callback);
   element.addEventListener("compositionend", callback);
-  document.addEventListener("keydown", handleEvent);
+  document.addEventListener("keydown", callback);
 
   try {
     while (true) {
@@ -54,6 +58,6 @@ export async function* commandWatcher(
   } finally {
     element.removeEventListener("compositionstart", callback);
     element.removeEventListener("compositionend", callback);
-    document.removeEventListener("keydown", handleEvent);
+    document.removeEventListener("keydown", callback);
   }
 }
