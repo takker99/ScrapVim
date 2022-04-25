@@ -7,7 +7,7 @@ import { toVimKey } from "./toVimKey.ts";
 
 export async function* commandWatcher(
   element: HTMLInputElement | HTMLTextAreaElement,
-) {
+): AsyncGenerator<string, void, unknown> {
   const [watcher, handleEvent] = promisify<CompositionEvent | KeyboardEvent>();
 
   const callback = (e: unknown) => {
@@ -55,6 +55,8 @@ export async function* commandWatcher(
         break;
       }
     }
+  } catch (e) {
+    throw e;
   } finally {
     element.removeEventListener("compositionstart", callback);
     element.removeEventListener("compositionend", callback);
