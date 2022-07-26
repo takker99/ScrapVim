@@ -10,17 +10,17 @@ export {
   replaceLines,
   textInput,
   useStatusBar,
-} from "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.14.7/browser/dom/mod.ts";
+} from "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.14.8/browser/dom/mod.ts";
 export type {
   CaretInfo,
-} from "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.14.7/browser/dom/mod.ts";
+} from "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.14.8/browser/dom/mod.ts";
 export {
   sleep,
-} from "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.14.7/sleep.ts";
+} from "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.14.8/sleep.ts";
 export {
   getIndentLineCount,
-} from "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.14.7/text.ts";
+} from "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.14.8/text.ts";
 export {
   encodeTitleURI,
   toTitleLc,
-} from "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.14.7/title.ts";
+} from "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.14.8/title.ts";
