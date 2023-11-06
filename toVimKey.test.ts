@@ -1,7 +1,5 @@
-/// <reference lib="deno.ns" />
-
-import { toVimKey } from "./toVimKey.ts";
-import { assertStrictEquals } from "./deps/testing.ts";
+import { normalize, split, toVimKey } from "./toVimKey.ts";
+import { assertEquals, assertStrictEquals } from "./deps/testing.ts";
 
 const makeEvent = (
   key: string,
@@ -33,19 +31,19 @@ Deno.test("toVimKey()", async (t) => {
       assertStrictEquals(toVimKey(makeEvent(char)), char);
       assertStrictEquals(
         toVimKey(makeEvent(char, ["ctrl"])),
-        `<C-${char.toUpperCase()}>`,
+        `<C-${char}>`,
       );
       assertStrictEquals(
         toVimKey(makeEvent(char, ["ctrl", "alt"])),
-        `<A-C-${char.toUpperCase()}>`,
+        `<A-C-${char}>`,
       );
       assertStrictEquals(
         toVimKey(makeEvent(char, ["ctrl", "alt", "shift"])),
-        `<A-C-${char.toUpperCase()}>`,
+        `<A-C-${char}>`,
       );
       assertStrictEquals(
         toVimKey(makeEvent(char, ["ctrl", "meta"])),
-        `<C-M-${char.toUpperCase()}>`,
+        `<C-M-${char}>`,
       );
     }
     for (const char of characters.toUpperCase()) {
@@ -53,4 +51,42 @@ Deno.test("toVimKey()", async (t) => {
       assertStrictEquals(toVimKey(makeEvent(char, ["shift"])), char);
     }
   });
+});
+Deno.test("normalize()", () => {
+  assertStrictEquals(normalize("<Return>"), "<Enter>");
+  assertStrictEquals(normalize("<CR>"), "<Enter>");
+  assertStrictEquals(normalize("<BSlash>"), "\\\\");
+  assertStrictEquals(normalize("\\"), "\\\\");
+  assertStrictEquals(normalize("<Bar>"), "|");
+  assertStrictEquals(normalize("<lt>"), "\\<");
+  assertStrictEquals(normalize("<"), "\\<");
+  assertStrictEquals(normalize("a"), "a");
+});
+Deno.test("split()", () => {
+  assertEquals([...split("")], []);
+  assertEquals([...split("a")], ["a"]);
+  assertEquals([...split("<")], ["<"]);
+  assertEquals([...split("\\<")], ["\\<"]);
+  assertEquals([...split("\\")], ["\\"]);
+  assertEquals([...split("\\\\")], ["\\\\"]);
+  assertEquals([...split("<C-a>")], ["<C-a>"]);
+  assertEquals([...split("<F12>")], ["<F12>"]);
+  assertEquals([...split("<C-\\><C-n>")], ["<C-\\>", "<C-n>"]);
+  assertEquals([...split("<C-\\><C-n>a")], ["<C-\\>", "<C-n>", "a"]);
+  assertEquals([...split("\\\\")], ["\\\\"]);
+  assertEquals([...split("\\<C-a>")], ["\\<", "C", "-", "a", ">"]);
+  assertEquals([...split("\\\\<C-]>")], ["\\\\", "<C-]>"]);
+  assertEquals([...split("\\\\<C-\\><C-n>a")], [
+    "\\\\",
+    "<C-\\>",
+    "<C-n>",
+    "a",
+  ]);
+  assertEquals([...split("\\\\<C-\\><C-n>a\\\\")], [
+    "\\\\",
+    "<C-\\>",
+    "<C-n>",
+    "a",
+    "\\\\",
+  ]);
 });
