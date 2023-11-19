@@ -15,7 +15,9 @@ let disposeCaret = () => {};
 const dispatch = (next: Mode): void => {
   if (mode === next && commands.length !== 0) return;
   mode = next;
-  disposeCaret = mode === "normal" ? viewCaret(cursor) : (disposeCaret(), () => {});
+  disposeCaret = mode === "normal"
+    ? viewCaret(cursor)
+    : (disposeCaret(), () => {});
   commands = [
     ...Object.entries(mode === "normal" ? normalKeyMap : insertKeyMap),
   ].map(([key, command]) => ({
