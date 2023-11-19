@@ -4,68 +4,18 @@ import type { KeyMap, Mode } from "./types.ts";
 import { filterCommands } from "./filterCommands.ts";
 import { normalize, split, toVimKey } from "./toVimKey.ts";
 import { listenKeySequences } from "./listenKeySequences.ts";
+import { viewCaret } from "./viewCaret.ts";
 
 let mode: Mode = "normal";
 let sequence: string[] = [];
 let commands: KeyMap[] = [];
 const { cursor, selection } = takeStores();
 
-{
-  const staticStyle = document.createElement("style");
-  staticStyle.textContent = `.line {
-  --return-symbol: "⏎";
-  --vim-cursor-bg: hsla(38.8, 100%, 50%, 0.5);
-}
-.line :is(
-  :not(.code-block.start) > .indent:not(:has(br), .cell-text, .tab),
-  .text:not(:has(.indent)) span:has(> .char-index):not(:has(br)):last-of-type,
-  .code-block-start > span:first-of-type,
-  .line-title .text
-):after,
-.line :is(.c-0:has(br.empty-char-index), .indent:has(> br), .cell:last-of-type .tab):before {
-  content: var(--return-symbol);
-}
-.line .formula-preview.text span.result span.indent:after {
-  content: "";
-}`;
-  document.head.append(staticStyle);
-}
-const viewCaret = () => {
-  const style = document.createElement("style");
-  document.head.append(style);
-  let animationId: number | undefined;
-
-  const callback = () => {
-    const { line, char } = cursor.getPosition();
-    const isLast = cursor.lines[line].text.length === char;
-    if (animationId !== undefined) cancelAnimationFrame(animationId);
-    animationId = requestAnimationFrame(() => {
-      style.textContent = `${
-        isLast
-          ? `.line:nth-of-type(${
-            line + 1
-          }) :is(:not(.code-block.start) > .indent:not(:has(br), .cell-text, .tab), .text:not(:has(.indent)) span:has(> .char-index):not(:has(br)):last-of-type, .code-block-start > span:first-of-type, .line-title .text):after, .line:nth-of-type(${
-            line + 1
-          }) :is(.c-0:has(br.empty-char-index), .indent:has(> br), .cell:last-of-type .tab):before`
-          : `.line:nth-of-type(${line + 1}) .c-${char}`
-      } {
-  background-color: var(--vim-cursor-bg);
-}`;
-    });
-  };
-  cursor.addChangeListener(callback);
-  callback();
-  return () => {
-    cursor.removeChangeListener(callback);
-    style.remove();
-  };
-};
-
 let disposeCaret = () => {};
 const dispatch = (next: Mode): void => {
   if (mode === next && commands.length !== 0) return;
   mode = next;
-  disposeCaret = mode === "normal" ? viewCaret() : (disposeCaret(), () => {});
+  disposeCaret = mode === "normal" ? viewCaret(cursor) : (disposeCaret(), () => {});
   commands = [
     ...Object.entries(mode === "normal" ? normalKeyMap : insertKeyMap),
   ].map(([key, command]) => ({
