@@ -1,1 +1,1 @@
-export * from "https://raw.githubusercontent.com/scrapbox-jp/types/0.6.1/mod.ts";
+export * from "https://raw.githubusercontent.com/scrapbox-jp/types/0.7.0/mod.ts";
